@@ -20,5 +20,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "OverlayService"
-include(":app")
- 
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+include(":demo")
+include(":overlay-service")
+project(":overlay-service").name = "overlay-service-lib"
