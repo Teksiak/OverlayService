@@ -23,8 +23,17 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 /**
  * Base class for overlay services that display a Compose UI overlay.
  *
- * It handles the lifecycle of the overlay and provides methods to show and hide the overlay.
- * Includes the implementation of view model store and saved state registry.
+ * This service allows displaying Jetpack Compose UI elements as an overlay on top of other
+ * applications. It properly implements [LifecycleOwner], [SavedStateRegistryOwner], and
+ * [ViewModelStoreOwner] interfaces to provide full Compose integration with lifecycle awareness
+ * and state management capabilities.
+ *
+ * Usage:
+ * 1. Extend this class in your own overlay service
+ * 2. Call [showOverlay] with your Compose content to display the overlay
+ * 3. Call [hideOverlay] when you want to remove the overlay
+ *
+ * *Your application must have the SYSTEM_ALERT_WINDOW permission granted to display overlays.*
  */
 open class OverlayService: Service(), LifecycleOwner, SavedStateRegistryOwner, ViewModelStoreOwner {
     override fun onBind(intent: Intent?): IBinder? = null
@@ -85,9 +94,6 @@ open class OverlayService: Service(), LifecycleOwner, SavedStateRegistryOwner, V
         windowManager.addView(overlayView, params)
     }
 
-    /**
-     * Hides the overlay view.
-     */
     protected open fun hideOverlay() {
         overlayView?.let {
             windowManager.removeView(it)
