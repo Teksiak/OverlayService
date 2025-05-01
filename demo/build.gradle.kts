@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    implementation(projects.overlayService)
+    implementation(projects.overlayServiceLib)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
