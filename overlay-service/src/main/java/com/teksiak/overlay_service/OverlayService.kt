@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.IBinder
-import android.provider.Settings
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
@@ -27,7 +26,7 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
  * It handles the lifecycle of the overlay and provides methods to show and hide the overlay.
  * Includes the implementation of view model store and saved state registry.
  */
-open class OverlayService: Service(), LifecycleOwner, SavedStateRegistryOwner {
+open class OverlayService: Service(), LifecycleOwner, SavedStateRegistryOwner, ViewModelStoreOwner {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private lateinit var windowManager: WindowManager
@@ -36,17 +35,13 @@ open class OverlayService: Service(), LifecycleOwner, SavedStateRegistryOwner {
     private lateinit var lifecycleRegistry: LifecycleRegistry
     private lateinit var savedStateRegistryController: SavedStateRegistryController
 
-    private val _viewModelStore = ViewModelStore()
-    private val viewModelStoreOwner = object : ViewModelStoreOwner {
-        override val viewModelStore: ViewModelStore
-            get() = _viewModelStore
-    }
-
     override val lifecycle: Lifecycle
         get() = lifecycleRegistry
 
     override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
+
+    override val viewModelStore: ViewModelStore = ViewModelStore()
 
     override fun onCreate() {
         super.onCreate()
@@ -66,16 +61,12 @@ open class OverlayService: Service(), LifecycleOwner, SavedStateRegistryOwner {
     ) {
         if (overlayView != null) return
 
-        if (Settings.canDrawOverlays(applicationContext)) {
-            throw IllegalStateException("Overlay permission is not granted.")
-        }
-
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 
         overlayView = ComposeView(this).apply {
             setViewTreeLifecycleOwner(this@OverlayService)
-            setViewTreeViewModelStoreOwner(viewModelStoreOwner)
+            setViewTreeViewModelStoreOwner(this@OverlayService)
             setViewTreeSavedStateRegistryOwner(this@OverlayService)
 
             setContent {
@@ -84,10 +75,10 @@ open class OverlayService: Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
 
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
         )
 
@@ -108,6 +99,6 @@ open class OverlayService: Service(), LifecycleOwner, SavedStateRegistryOwner {
         super.onDestroy()
         hideOverlay()
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        _viewModelStore.clear()
+        viewModelStore.clear()
     }
 }

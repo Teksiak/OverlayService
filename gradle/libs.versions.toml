@@ -35,6 +35,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 compose = [
   "androidx-ui",
   "androidx-ui-graphics",
+  "androidx-ui-tooling",
   "androidx-ui-tooling-preview",
   "androidx-material3"
 ]

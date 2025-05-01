@@ -21,7 +21,6 @@ import androidx.core.net.toUri
 
 @Composable
 fun TimerScreen(
-    viewModel: TimerViewModel,
     isOverlayPermissionGranted: Boolean,
     startTimerService: () -> Unit,
     stopTimerService: () -> Unit,
@@ -37,7 +36,21 @@ fun TimerScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (isOverlayPermissionGranted) {
-            Text("Permission granted")
+            Button(
+                onClick = {
+                    startTimerService()
+                }
+            ) {
+                Text("Start Timer")
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    stopTimerService()
+                }
+            ) {
+                Text("Stop Timer")
+            }
         } else {
             Text(
                 text = "Display over other apps permission required",

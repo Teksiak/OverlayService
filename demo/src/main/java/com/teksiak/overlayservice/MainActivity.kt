@@ -1,6 +1,7 @@
 package com.teksiak.overlayservice
 
 import android.Manifest.permission.POST_NOTIFICATIONS
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -11,7 +12,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -29,8 +29,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
 class MainActivity : ComponentActivity() {
-
-    private val timerViewModel by viewModels<TimerViewModel>()
 
     private val _isOverlayPermissionGranted = MutableStateFlow(false)
 
@@ -61,7 +59,7 @@ class MainActivity : ComponentActivity() {
                 if (!isGranted) {
                     Toast.makeText(
                         context,
-                        "Notification permission is required for foreground service",
+                        "Notification permission is required for foreground service.",
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -76,10 +74,9 @@ class MainActivity : ComponentActivity() {
             OverlayServiceTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     TimerScreen(
-                        viewModel = timerViewModel,
                         isOverlayPermissionGranted = isOverlayPermissionGranted,
-                        startTimerService = { },
-                        stopTimerService = { },
+                        startTimerService = ::startTimerService,
+                        stopTimerService = ::stopTimerService,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -91,6 +88,20 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         _isOverlayPermissionGranted.update {
             Settings.canDrawOverlays(this)
+        }
+    }
+
+    private fun startTimerService() {
+        Intent(this, TimerOverlayService::class.java).also {
+            it.action = TimerOverlayService.ACTION_START
+            startService(it)
+        }
+    }
+
+    private fun stopTimerService() {
+        Intent(this, TimerOverlayService::class.java).also {
+            it.action = TimerOverlayService.ACTION_STOP
+            startService(it)
         }
     }
 }
