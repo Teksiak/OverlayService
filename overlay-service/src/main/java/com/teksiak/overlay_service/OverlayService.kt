@@ -96,7 +96,8 @@ open class OverlayService: Service(), LifecycleOwner, SavedStateRegistryOwner, V
 
     protected open fun hideOverlay() {
         overlayView?.let {
-            windowManager.removeView(it)
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            windowManager.removeViewImmediate(it)
             overlayView = null
         }
     }
